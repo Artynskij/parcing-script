@@ -21,7 +21,8 @@ import { randomMinute } from 'src/asset/components/randomMinute';
 import { getDistrictsInCafe } from './services/cafe/getDistrictsInCafe';
 import { getUrlsActivities } from './services/activities/getUrlsActivities';
 import { mockActivitiesTrip } from 'src/asset/utils/mockData';
-import { getObjectTest } from './services/object/getObject';
+import { getProduct } from './services/object/getProduct';
+import { getCafe } from './services/object/getCafe';
 
 @Injectable()
 export class TripService {
@@ -29,7 +30,7 @@ export class TripService {
     // const res = getUrlsCafeNormData();
 
     // const res = getTest();
-    const res = getObjectTest();
+    const res = getProduct();
 
     return res;
   }
@@ -44,12 +45,12 @@ export class TripService {
     // Big data
     //done/hotel/urlBigData
     //activities/countryNotFilter/{}
-    const res1 = getInFile('activities/countryNotFilter/United Arab Emirates');
+
     //  Small Data
     // const res1 = getInFile('activities/urlsNormDataActivities').find(
     //   (item) => item.country.country === 'United Arab Emirates',
     // );
 
-    return res1.data.length;
+    return 'res';
   }
 }
