@@ -22,7 +22,6 @@ import { getDistrictsInCafe } from './services/cafe/getDistrictsInCafe';
 import { getUrlsActivities } from './services/activities/getUrlsActivities';
 import { mockActivitiesTrip } from 'src/asset/utils/mockData';
 import { getProduct } from './services/object/getProduct';
-import { getCafe } from './services/object/getCafe';
 
 @Injectable()
 export class TripService {
