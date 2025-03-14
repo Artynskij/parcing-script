@@ -20,6 +20,17 @@ export const constructorCafe = (globalObject: any) => {
   const currentLocationParse = globalObject.find((item) => {
     return item['currentLocation'];
   })?.currentLocation[0];
+  const schedule = () => {
+    const schedule = mainInfoCafeParse?.open_hours?.schedule;
+    const formattedSchedule = Object.keys(schedule).map((day) => {
+      return {
+        day: day,
+        close_time: schedule[day][0].close_time,
+        open_time: schedule[day][0].open_time,
+      };
+    });
+    return formattedSchedule;
+  };
 
   const mediaParse = globalObject
     .filter((item) => {
@@ -43,9 +54,12 @@ export const constructorCafe = (globalObject: any) => {
       value: [
         ...(mainInfoCafeParse?.topTags.map((tag) => {
           return {
-            idTrip: tag.id,
-            value: tag.tag.localizedName,
+            idTripCategory: tag.id,
+            title: tag.tag.localizedName,
             secondaryValue: tag.secondary_name,
+            categoryName: null,
+            categoryIcon: null,
+            visibleTrip: null,
           };
         }) || []),
       ],
@@ -55,9 +69,12 @@ export const constructorCafe = (globalObject: any) => {
       value: [
         ...(mainInfoCafeParse.cuisines.items.map((tag) => {
           return {
-            idTrip: tag.id,
-            value: tag.tag.localizedName,
+            idTripCategory: tag.id,
+            title: tag.tag.localizedName,
             secondaryValue: tag.secondary_name,
+            categoryName: null,
+            categoryIcon: null,
+            visibleTrip: null,
           };
         }) || []),
       ],
@@ -67,9 +84,12 @@ export const constructorCafe = (globalObject: any) => {
       value: [
         ...(mainInfoCafeParse.price_types.items.map((tag) => {
           return {
-            idTrip: tag.id,
-            value: tag.tag.localizedName,
+            idTripCategory: tag.id,
+            title: tag.tag.localizedName,
             secondaryValue: tag.secondary_name,
+            categoryName: null,
+            categoryIcon: null,
+            visibleTrip: null,
           };
         }) || []),
       ],
@@ -79,9 +99,12 @@ export const constructorCafe = (globalObject: any) => {
       value: [
         ...(mainInfoCafeParse.diets.items.map((tag) => {
           return {
-            idTrip: tag.id,
-            value: tag.tag.localizedName,
+            idTripCategory: tag.id,
+            title: tag.tag.localizedName,
             secondaryValue: tag.secondary_name,
+            categoryName: null,
+            categoryIcon: null,
+            visibleTrip: null,
           };
         }) || []),
       ],
@@ -91,9 +114,12 @@ export const constructorCafe = (globalObject: any) => {
       value: [
         ...(mainInfoCafeParse.meal_types.items.map((tag) => {
           return {
-            idTrip: tag.id,
-            value: tag.tag.localizedName,
+            idTripCategory: tag.id,
+            title: tag.tag.localizedName,
             secondaryValue: tag.secondary_name,
+            categoryName: null,
+            categoryIcon: null,
+            visibleTrip: null,
           };
         }) || []),
       ],
@@ -103,9 +129,12 @@ export const constructorCafe = (globalObject: any) => {
       value: [
         ...(mainInfoCafeParse.dining_options.items.map((tag) => {
           return {
-            idTrip: tag.id,
-            value: tag.tag.localizedName,
+            idTripCategory: tag.id,
+            title: tag.tag.localizedName,
             secondaryValue: tag.secondary_name,
+            categoryName: null,
+            categoryIcon: null,
+            visibleTrip: null,
           };
         }) || []),
       ],
@@ -115,9 +144,12 @@ export const constructorCafe = (globalObject: any) => {
       value: [
         ...(mainInfoCafeParse.establishment_types.items.map((tag) => {
           return {
-            idTrip: tag.id,
-            value: tag.tag.localizedName,
+            idTripCategory: tag.id,
+            title: tag.tag.localizedName,
             secondaryValue: tag.secondary_name,
+            categoryName: null,
+            categoryIcon: null,
+            visibleTrip: null,
           };
         }) || []),
       ],
@@ -160,7 +192,7 @@ export const constructorCafe = (globalObject: any) => {
     tripBreadcrumb: breadcrumbParse,
     additional: 'additional',
     seoTrip: seoParse,
-    schedule: mainInfoCafeParse?.open_hours?.schedule,
+    schedule: schedule(),
     media: mediaParse,
     translateData: 'translateData',
   };

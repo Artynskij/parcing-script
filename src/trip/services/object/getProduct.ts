@@ -18,6 +18,7 @@ import { constructorHotel } from 'src/asset/components/constructor/constructorHo
 import { delay } from 'src/asset/components/delay';
 import { randomMinute } from 'src/asset/components/randomMinute';
 import { getNamesInFolder } from 'src/asset/components/fs/getNamesInFolder';
+import { constructorActivities } from 'src/asset/components/constructor/constructorActivities';
 // import { constructorActivities } from 'src/asset/components/constructor/constructorActivities';
 const { JSDOM } = jsdom;
 
@@ -51,7 +52,11 @@ export const getProduct = async () => {
           //   return res;
           // await delay(randomMinute(0.05, 0.09));
           requestCount++;
-          console.log(`${requestCount} request, err - ${errorCount}`);
+          console.log(
+            `${requestCount} request, err - ${errorCount}, cookie ${randomCookie}/${
+              cookieTripadvisor.length - 1
+            }`,
+          );
           if (requestCount % 10 === 0) {
             await delay(randomMinute(0.05, 0.09));
           }
@@ -84,7 +89,8 @@ export const getProduct = async () => {
           if (errorCount % 5 === 0) {
             await delay(randomMinute(5, 10));
           }
-          if (errorCount % 15 === 0) {
+
+          if (errorCount % 50 === 0) {
             await delay(randomMinute(50, 90));
           }
           if (errorCount === requestCount) {
@@ -105,56 +111,32 @@ export const getProduct = async () => {
     // 'Armenia',
     // 'Georgia',
     // 'United Arab Emirates',
-    'Turkiye',
+    'Türkiye',
     // 'Kazakhstan',
-    'Russia',
+    // 'Russia',
   ];
-  const countriesFiles: any = getNamesInFolder('done/cafe/urlBigData') as any[];
-  for (
-    let indexTarget = 0;
-    indexTarget < targetCountriesString.length;
-    indexTarget++
-  ) {
-    const targetCountry = targetCountriesString[indexTarget];
+  // const countriesFiles: any = getNamesInFolder(
+  //   'done/activities/urlBigData',
+  // ) as any[];
+  // for (
+  //   let indexTarget = 0;
+  //   indexTarget < targetCountriesString.length;
+  //   indexTarget++
+  // ) {
+  //   const targetCountry = targetCountriesString[indexTarget];
 
-    const findCountryFile = countriesFiles.find(
-      (countryFile) => countryFile === targetCountry,
-    );
+  //   const findCountryFile = countriesFiles.find(
+  //     (countryFile) => countryFile === targetCountry,
+  //   );
+  //   const findCountryFileData = getInFile(
+  //     `done/activities/urlBigData/${findCountryFile}`,
+  //   );
+  // }
+  const country = getInFile(`done/cafe/urlBigData/${'Türkiye'}`);
+  const objectTest = country.data.find((item) => item.id === 26803780) as any;
 
-    if (findCountryFile) {
-      const findCountryFileData = getInFile(
-        `done/cafe/urlBigData/${findCountryFile}`,
-      );
-      console.log(`${findCountryFileData.country.country} start`);
+  const globalObject = (await getData(objectTest)) as any[];
+  const constructorData = constructorCafe(globalObject);
 
-      const doneData = getNamesInFolder(
-        `maks/${findCountryFileData.country.country}`,
-      ) as string[];
-      for (let i = 0; i < findCountryFileData.data.length; i++) {
-        const countryData = findCountryFileData.data[i];
-        const fileName = countryData.id as number;
-        if (doneData.find((item) => fileName.toString() === item)) {
-          continue;
-        }
-
-        const globalObject = await getData(countryData);
-        if (globalObject) {
-          appendToFile(
-            `/maks/${findCountryFileData.country.country}/${fileName}`,
-            globalObject,
-          );
-        }
-
-        // const constructorData = constructorActivities(globalObject);
-      }
-      console.log(`${findCountryFile} end`);
-    }
-  }
-
-  // const objectTest = country.data.find((item) => item.id === 19096786) as any;
-
-  // const globalObject = (await getData(objectTest)) as any[];
-  // const constructorData = constructorCafe(globalObject);
-
-  return { data: 'countriesFile', message: statusMessage };
+  return { data: constructorData, message: statusMessage };
 };

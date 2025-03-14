@@ -1,10 +1,11 @@
 export const constructorHotel = (globalObject: any[]) => {
   const mainHotelInfoParse = globalObject.find((item) => {
     if (Array.isArray(item['locations'])) {
-      return item['locations'][0]?.detail?.hotelAmenities;
+      return item?.hotelAmenities;
     }
     return false;
-  })?.locations[0];
+  });
+  // return mainHotelInfoParse;
   const breadcrumbParse = globalObject.find((item) => {
     return item['breadcrumbsData'];
   })?.breadcrumbsData.breadcrumbs;
@@ -13,7 +14,10 @@ export const constructorHotel = (globalObject: any[]) => {
   })?.Opf_getOnPageFactorsForLocale[0]?.factors;
   const categoryInfoParse = globalObject.find((item) => {
     if (Array.isArray(item['locations'])) {
-      return item['locations'][0]?.accommodationCategory;
+      return (
+        item['locations'][0]?.accommodationCategory &&
+        item['locations'][0]?.placeType
+      );
     }
     return false;
   })?.locations[0];
@@ -45,12 +49,56 @@ export const constructorHotel = (globalObject: any[]) => {
       });
       return { tripMediaCount: item.totalMediaCount, media: mediaList };
     });
+  const rating = () => {
+    const _ratingsParse =
+      mainHotelInfoParse?.locations[0].detail?.hotel.reviewSubratingAvgs;
+    const arrayTripID = {
+      47: 'location',
+      11: 'rooms',
+      13: 'priceQuality',
+      14: 'clean',
+      12: 'service',
+      190: 'sleep',
+    };
+    const ratings = Object.keys(arrayTripID).reduce((acc, id) => {
+      const key = arrayTripID[Number(id)];
+      const foundItem = _ratingsParse?.find(
+        (item) => item.questionId === Number(id),
+      );
+      acc[key] = foundItem ? foundItem.avgRating : null;
+      return acc;
+    }, {});
 
+    return {
+      count: mainHotelInfoParse?.reviewSummaryInfo[0].responseData?.count,
+      rate: mainHotelInfoParse?.reviewSummaryInfo[0].responseData?.rating,
+      additional: ratings,
+    };
+  };
+  const price = {
+    currency: 'RUB',
+    min_price: locationNeighborhoodsParse?.detail.priceRange?.minimum || null,
+    max_price: locationNeighborhoodsParse?.detail.priceRange?.maximum || null,
+    type_price: null,
+  };
+  const contacts = () => {
+    const _phoneParse =
+      mainHotelInfoParse.locations[0].businessAdvantageData?.contactLinks?.find(
+        (item) => !!item.rawPhone,
+      );
+
+    return {
+      webSite:
+        mainHotelInfoParse.locations[0].businessAdvantageData?.specialOffer
+          ?.lightboxClickUrl || null,
+      phoneNumber: _phoneParse?.rawPhone || null,
+    };
+  };
   const filterTags = [
     {
       key: 'roomFeatures',
       value: [
-        ...(mainHotelInfoParse?.detail.hotelAmenities.highlightedAmenities?.roomFeatures?.map(
+        ...(mainHotelInfoParse?.hotelAmenities[0].highlightedAmenities?.roomFeatures?.map(
           (tag) => {
             return {
               idTripCategory: tag.tagId,
@@ -61,7 +109,7 @@ export const constructorHotel = (globalObject: any[]) => {
             };
           },
         ) || []),
-        ...(mainHotelInfoParse?.detail.hotelAmenities.nonHighlightedAmenities?.roomFeatures?.map(
+        ...(mainHotelInfoParse?.hotelAmenities[0].nonHighlightedAmenities?.roomFeatures?.map(
           (tag) => {
             return {
               idTripCategory: tag.tagId,
@@ -77,7 +125,7 @@ export const constructorHotel = (globalObject: any[]) => {
     {
       key: 'roomTypes',
       value: [
-        ...(mainHotelInfoParse?.detail.hotelAmenities.highlightedAmenities?.roomTypes?.map(
+        ...(mainHotelInfoParse?.hotelAmenities[0].highlightedAmenities?.roomTypes?.map(
           (tag) => {
             return {
               idTripCategory: tag.tagId,
@@ -88,7 +136,7 @@ export const constructorHotel = (globalObject: any[]) => {
             };
           },
         ) || []),
-        ...(mainHotelInfoParse?.detail.hotelAmenities.nonHighlightedAmenities?.roomTypes?.map(
+        ...(mainHotelInfoParse?.hotelAmenities[0].nonHighlightedAmenities?.roomTypes?.map(
           (tag) => {
             return {
               idTripCategory: tag.tagId,
@@ -104,7 +152,7 @@ export const constructorHotel = (globalObject: any[]) => {
     {
       key: 'propertyAmenities',
       value: [
-        ...(mainHotelInfoParse?.detail.hotelAmenities.highlightedAmenities?.propertyAmenities?.map(
+        ...(mainHotelInfoParse?.hotelAmenities[0].highlightedAmenities?.propertyAmenities?.map(
           (tag) => {
             return {
               idTripCategory: tag.tagId,
@@ -115,7 +163,7 @@ export const constructorHotel = (globalObject: any[]) => {
             };
           },
         ) || []),
-        ...(mainHotelInfoParse?.detail.hotelAmenities.nonHighlightedAmenities?.propertyAmenities?.map(
+        ...(mainHotelInfoParse?.hotelAmenities[0].nonHighlightedAmenities?.propertyAmenities?.map(
           (tag) => {
             return {
               idTripCategory: tag.tagId,
@@ -129,9 +177,23 @@ export const constructorHotel = (globalObject: any[]) => {
       ],
     },
     {
+      key: 'languagesSpoken',
+      value: [
+        ...(mainHotelInfoParse?.hotelAmenities[0].languagesSpoken.map((tag) => {
+          return {
+            idTripCategory: tag.tagId,
+            title: tag.amenityNameLocalized,
+            categoryName: tag.amenityNameLocalized,
+            categoryIcon: null,
+            visibleTrip: true,
+          };
+        }) || []),
+      ],
+    },
+    {
       key: 'starRating',
       value: [
-        ...(mainHotelInfoParse?.detail.starRating.map((tag) => {
+        ...(mainHotelInfoParse?.locations[0]?.detail?.starRating.map((tag) => {
           return {
             idTripCategory: tag.tagId,
             title: tag.tagNameLocalized,
@@ -145,42 +207,21 @@ export const constructorHotel = (globalObject: any[]) => {
     {
       key: 'styleRankings',
       value: [
-        ...(mainHotelInfoParse?.detail.styleRankings.map((tag) => {
-          return {
-            idTripCategory: tag.tagId,
-            title: tag.translatedName,
-            categoryName: tag.tagName,
-            categoryIcon: false,
-            visibleTrip: true,
-          };
-        }) || []),
+        ...(mainHotelInfoParse?.locations[0]?.detail?.styleRankings.map(
+          (tag) => {
+            return {
+              idTripCategory: tag.tagId,
+              title: tag.translatedName,
+              categoryName: tag.tagName,
+              categoryIcon: false,
+              visibleTrip: true,
+            };
+          },
+        ) || []),
       ],
     },
   ];
-  const rating = () => {
-    const _ratingsParse = mainHotelInfoParse?.detail.hotel.reviewSubratingAvgs;
-    const arrayTripID = {
-      47: 'location',
-      11: 'rooms',
-      13: 'priceQuality',
-      14: 'clean',
-      12: 'service',
-    };
-    const ratings = Object.keys(arrayTripID).reduce((acc, id) => {
-      const key = arrayTripID[Number(id)];
-      const foundItem = _ratingsParse.find(
-        (item) => item.questionId === Number(id),
-      );
-      acc[key] = foundItem ? foundItem.avgRating : null;
-      return acc;
-    }, {});
 
-    return {
-      count: mainHotelInfoParse.reviewSummary.count,
-      rate: mainHotelInfoParse.reviewSummary.rating,
-      additional: ratings,
-    };
-  };
   const location = {
     addressString: currentLocationParse['streetAddress']['fullAddress'],
     address: streetAddress['streetAddress'],
@@ -202,21 +243,21 @@ export const constructorHotel = (globalObject: any[]) => {
     },
   ];
   const returnData = {
-    tripId: mainHotelInfoParse?.locationId,
-    title: mainHotelInfoParse?.name,
-    description: mainHotelInfoParse?.locationDescription,
+    tripId: mainHotelInfoParse?.locations[0].locationId || null,
+    title: mainHotelInfoParse?.locations[0].name || null,
+    description: mainHotelInfoParse?.locations[0].locationDescription || null,
     rating: rating(),
-    placeType: categoryInfoParse?.placeType,
-    category: categoryInfoParse?.accommodationCategory,
-    price: locationNeighborhoodsParse?.detail.priceRange,
-    contacts: null,
-    tags: filterTags,
-    location: location,
-    tripBreadcrumb: breadcrumbParse,
-    additional: locationNeighborhoodsParse?.detail?.hotel.details,
-    seoTrip: seoParse,
+    placeType: categoryInfoParse?.placeType || null,
+    category: mainHotelInfoParse?.geoInfo[0].accommodationType || null,
+    price: price,
+    contacts: contacts(),
+    tags: filterTags || null,
+    location: location || null,
+    tripBreadcrumb: breadcrumbParse || null,
+    additional: locationNeighborhoodsParse?.detail?.hotel.details || null,
+    seoTrip: seoParse || null,
     schedule: mainHotelInfoParse?.open_hours?.schedule || null,
-    media: mediaParse,
+    media: mediaParse || null,
     translateData: translateData,
   };
   return returnData;
